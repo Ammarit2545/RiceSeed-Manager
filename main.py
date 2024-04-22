@@ -6,13 +6,14 @@ import mongoengine
 from datetime import datetime, timedelta
 import json
 from flasgger import Swagger
-from flask_jwt_extended import create_access_token
+#from flask_jwt_extended import create_access_token
 
 #Model
 from models.rice_informations import RiceInformation
 from models.user import User
 from pytz import timezone
 import jwt  # Import jwt module for JWT functionality
+
 
 app = Flask(__name__)
 Swagger(app)
@@ -701,12 +702,22 @@ def logincheck():
 
         user = User.objects(username=username, password=password).first()
         if user:
+            token = "asdasdasd"
             # Generate JWT token with expiry time
             token_expiry = datetime.utcnow() + timedelta(hours=8)
-            token = jwt.encode({'user': username, 'exp': token_expiry}, 'SECRET_KEY', algorithm='HS256')
+            import jwt
+            from datetime import datetime, timedelta
+
+            # Secret key for signing the token (replace with your own secure key)
+            secret_key = 'Softnix'
+
+            # Generate JWT token with expiry
+            token_expiry = datetime.utcnow() + timedelta(hours=8)
+            payload = {'user': username, 'exp': token_expiry}
+            token = jwt.encode(payload, secret_key, algorithm='HS256')
 
             userToken = User.objects(username=username).first()
-            userToken.token = token
+            #userToken.token = token
             userToken.tokenExpiresIn = token_expiry
             userToken.save()
             print("token_expiry : ",token_expiry)
