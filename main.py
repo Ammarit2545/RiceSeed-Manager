@@ -8,7 +8,7 @@ import json
 from flasgger import Swagger
 import hashlib
 from pytz import timezone
-import jwt  # Import jwt module for JWT functionality
+import jwt
 
 #Model
 from models.rice_informations import RiceInformation
@@ -17,7 +17,7 @@ from models.user import User
 app = Flask(__name__)
 Swagger(app)
 
-# Database connection
+# Database connection เชื่อมต่อฐานข้อมูล
 mongoengine.connect("Softnix2024", host="localhost", port=27017)
 
 # กำหนด timezone ของประเทศไทย
@@ -29,11 +29,11 @@ utc_now = datetime.utcnow()
 # แปลงเวลา UTC เป็นเวลาในประเทศไทย
 thailand_now = utc_now.astimezone(thailand_timezone)
 
-# พิมพ์ผลลัพธ์
+# แสดงผลลัพธ์เวลาและวันที่ปัจจุบัน
 print("UTC Now:", utc_now)
 print("Thailand Now:", thailand_now)
 
-# Check if the database exists, if not, create it
+# เช็คหาก Database มีอยู่แล้วจะไม่สร้างใหม่ ,หากไม่มีจะทำการเพิ่มข้อมูลใหม่ทั้งหมด
 if "Softnix2024" not in MongoClient().list_database_names():
     db = MongoClient()["Softnix2024"]
 
@@ -126,18 +126,20 @@ def get_productsall(id=None):
         description: Product not found.
     """
     try:
-        token = request.args.get("token")  # Get token from query string
+        token = request.args.get("token")  # รับค่า token จาก query string 
 
         #--------------------------------------------------------------------------
-        # Check if token is provided
+        # ตรวจสอบว่ามี Token หรือไม่
         if not token:
             return jsonify({"error": "Unauthorized - Token missing"}), 401
 
         
-        # Check if token is valid and not expired
+        # ตรวจสอบว่า Token ถูกต้องและไม่หมดอายุ
         user = User.objects(token=token).first()
         Token_check = False
+
         import pytz
+
         # ที่ส่วนของ timezone ของประเทศไทย
         thailand_timezone = pytz.timezone('Asia/Bangkok')   
         utc_now = datetime.utcnow().replace(tzinfo=pytz.utc)  # เวลาปัจจุบันในรูปแบบ UTC
@@ -236,16 +238,16 @@ def get_products():
         description: Product not found.
     """
     try:
-        id = request.args.get("id")  # Get ID from query string
-        token = request.args.get("token")  # Get token from query string
+        id = request.args.get("id")         # รับค่า ID จาก query string
+        token = request.args.get("token")   # รับค่า token จาก query string
 
         #--------------------------------------------------------------------------
-        # Check if token is provided
+        # ตรวจสอบว่ามี Token หรือไม่
         if not token:
             return jsonify({"error": "Unauthorized - Token missing"}), 401
 
         
-        # Check if token is valid and not expired
+        # ตรวจสอบว่า Token ถูกต้องและไม่หมดอายุ
         user = User.objects(token=token).first()
         Token_check = False
         import pytz
@@ -270,7 +272,7 @@ def get_products():
         #--------------------------------------------------------------------------
 
         if not id:
-            # If ID is not provided in query string, try to get it from request body
+            # หาก ID ไม่ได้รับมาจาก query string, ลองรับจาก Request Body
             data = request.get_json()
             if data and "id" in data:
                 id = data["id"]
@@ -366,15 +368,15 @@ def post_product():
 
     """
     try:
-        Seed_RepDate = request.args.get("Seed_RepDate")  # Get ID from query string
-        Seed_Year = request.args.get("Seed_Year")  # Get ID from query string
-        Seeds_YearWeek = request.args.get("Seeds_YearWeek")  # Get ID from query string
-        Seed_Variety = request.args.get("Seed_Variety")  # Get ID from query string
-        Seed_RDCSD = request.args.get("Seed_RDCSD")  # Get ID from query string
-        Seed_Stock2Sale = request.args.get("Seed_Stock2Sale")  # Get ID from query string
-        Seed_Season = request.args.get("Seed_Season")  # Get ID from query string
-        Seed_Crop_Year = request.args.get("Seed_Crop_Year")  # Get ID from query string
-        token = request.args.get("token")  # Get token from query string
+        Seed_RepDate = request.args.get("Seed_RepDate")       # รับค่า ID จาก query string
+        Seed_Year = request.args.get("Seed_Year")             # รับค่า Seed_Year จาก query string
+        Seeds_YearWeek = request.args.get("Seeds_YearWeek")   # รับค่า Seeds_YearWeek จาก query string
+        Seed_Variety = request.args.get("Seed_Variety")       # รับค่า Seed_Variety จาก query string
+        Seed_RDCSD = request.args.get("Seed_RDCSD")           # รับค่า Seed_RDCSD จาก query string
+        Seed_Stock2Sale = request.args.get("Seed_Stock2Sale") # รับค่า Seed_Stock2Sale จาก query string
+        Seed_Season = request.args.get("Seed_Season")         # รับค่า Seed_Season จาก query string
+        Seed_Crop_Year = request.args.get("Seed_Crop_Year")   # รับค่า Seed_Crop_Year จาก query string
+        token = request.args.get("token")                     # รับค่า token จาก query string
         
         print("\t --- Token : ", token)
         print("Seed_RepDate:", Seed_RepDate)
@@ -387,7 +389,7 @@ def post_product():
         print("Seed_Crop_Year:", Seed_Crop_Year)
 
 
-        # Check if the rice information already exists in the database
+        # ตรวจสอบว่าข้อมูลอยู่ในฐานข้อมูลแล้วหรือไม่
         existing_info = RiceInformation.objects(
             Seed_RepDate=int(Seed_RepDate),
             Seed_Year=int(Seed_Year),
@@ -400,11 +402,11 @@ def post_product():
 
         
         #--------------------------------------------------------------------------
-        # Check if token is provided
+        # ตรวจสอบว่ามี Token หรือไม่
         if not token:
             return jsonify({"error": "Unauthorized - Token missing"}), 401
 
-        # Check if token is valid and not expired
+        # ตรวจสอบว่า Token ถูกต้องและไม่หมดอายุ
         user = User.objects(token=token).first()
         if not user:
             return jsonify({"error": "Unauthorized - Token expired or invalid"}), 401
@@ -438,7 +440,7 @@ def post_product():
             print("No existing information found")
             if formatted_token_expires_in_utc > formatted_thailand_now:
                 print("\n----- Token Can uSe \n")
-                # Insert rice product information into the database here
+                # ใส่ข้อมูลเมล็ดข้าวลงในฐานข้อมูล
                 data = [latest_id,Seed_RepDate,Seed_Year,Seeds_YearWeek,f"{Seed_Variety}",f"{Seed_RDCSD}",Seed_Stock2Sale,f"{Seed_Season}",f"{Seed_Crop_Year}"]
                 rice_info = RiceInformation(
                         id_rice=data[0],
@@ -489,16 +491,15 @@ def delete_product():
     """
     
     try:
-        id = request.args.get("id")  # Get ID from query string
-        token = request.args.get("token")  # Get token from query string
+        id = request.args.get("id")         # รับค่า ID จาก query string
+        token = request.args.get("token")   # รับค่า token จาก query string
 
         #--------------------------------------------------------------------------
-        # Check if token is provided
+        # ตรวจสอบว่ามี Token หรือไม่
         if not token:
             return jsonify({"error": "Unauthorized - Token missing"}), 401
-
         
-        # Check if token is valid and not expired
+        # ตรวจสอบว่า Token ถูกต้องและไม่หมดอายุ
         user = User.objects(token=token).first()
         Token_check = False
         import pytz
@@ -522,7 +523,7 @@ def delete_product():
             return jsonify({"error": "Unauthorized - Token expired or invalid"}), 401
         #--------------------------------------------------------------------------
         if not id:
-            # If ID is not provided in query string, try to get it from request body
+            # หากไม่มีการระบุ ID ให้ลองรับจาก Request Body
             data = request.get_json()
             if not data or "id" not in data:
                 return jsonify({"error": "No or invalid data provided"}), 400
@@ -608,16 +609,16 @@ def put_product():
         description: Unauthorized - Token missing or expired.
     """
     try:
-        # Check if token is provided
-        token = request.args.get("token")  # Get token from query string
-
-        #--------------------------------------------------------------------------
-        # Check if token is provided
-        if not token:
-            return jsonify({"error": "Unauthorized - Token missing"}), 401
 
         
-        # Check if token is valid and not expired
+        token = request.args.get("token")  # รับค่า token จาก query string
+
+        #--------------------------------------------------------------------------
+        # ตรวจสอบว่ามี Token หรือไม่
+        if not token:
+            return jsonify({"error": "Unauthorized - Token missing"}), 401
+        
+        # ตรวจสอบว่า Token ถูกต้องและไม่หมดอายุ
         user = User.objects(token=token).first()
         Token_check = False
         import pytz
@@ -644,17 +645,17 @@ def put_product():
         if not token:
             return jsonify({"error": "Unauthorized - Token missing"}), 401
 
-        # Get product ID from query string
+        # ระบค่า product ID จาก query string
         id_rice = request.args.get("id")
         if not id_rice:
             return jsonify({"error": "Product ID missing"}), 400
 
-        # Check if the product exists
+        # ตรวจสอบว่ามีข้อมูลอยู่แล้วหรือไม่
         product = RiceInformation.objects(id_rice=id_rice).first()
         if not product:
             return jsonify({"error": "Product not found"}), 404
         if Token_check :
-            # Update product information
+            # Update ข้อมูล
             product.Seed_RepDate = request.args.get("Seed_RepDate")
             product.Seed_Year = request.args.get("Seed_Year")
             product.Seeds_YearWeek = request.args.get("Seeds_YearWeek")
@@ -697,8 +698,8 @@ def logincheck():
         description: An error occurred while processing the request.
     """
     try:
-        username = request.args.get("username")  # Get username from query string
-        password = request.args.get("password")  # Get password from query string
+        username = request.args.get("username")  # รับค่า username จาก query string
+        password = request.args.get("password")  # รับค่า password จาก query string
 
         hashed_password = hashlib.sha512(password.encode()).hexdigest()
 
@@ -708,14 +709,14 @@ def logincheck():
         user = User.objects(username=username, password=password).first()
         if user:
             token = "asdasdasd"
-            # Generate JWT token with expiry time
+            # สร้างโทเค็น JWT พร้อมเวลาหมดอายุ
             token_expiry = datetime.utcnow() + timedelta(hours=8)
             
 
-            # Secret key for signing the token (replace with your own secure key)
+            # รหัสลับสำหรับการลงนามโทเค็น (แทนที่ด้วยรหัสความปลอดภัย)
             secret_key = 'Softnix'
 
-            # Generate JWT token with expiry
+            # สร้างโทเค็น JWT 
             token_expiry = datetime.utcnow() + timedelta(hours=8)
             payload = {'user': username, 'exp': token_expiry}
             token = jwt.encode(payload, secret_key, algorithm='HS256')
