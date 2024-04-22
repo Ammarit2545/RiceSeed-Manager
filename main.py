@@ -6,14 +6,13 @@ import mongoengine
 from datetime import datetime, timedelta
 import json
 from flasgger import Swagger
-#from flask_jwt_extended import create_access_token
+import hashlib
+from pytz import timezone
+import jwt  # Import jwt module for JWT functionality
 
 #Model
 from models.rice_informations import RiceInformation
 from models.user import User
-from pytz import timezone
-import jwt  # Import jwt module for JWT functionality
-
 
 app = Flask(__name__)
 Swagger(app)
@@ -49,6 +48,10 @@ if "Softnix2024" not in MongoClient().list_database_names():
 
     def import_csv_to_mongodb(csv_file_path):
         data = import_csv_to_list(csv_file_path)
+        password = "1234"
+        hashed_password = hashlib.sha512(password.encode()).hexdigest()
+
+        print("Hashed Password:", hashed_password)
         for i in range(len(data)):
             try:
                 n = int(data[i][6].replace(',', ''))
@@ -69,7 +72,7 @@ if "Softnix2024" not in MongoClient().list_database_names():
 
         user = User(
             username="admin",
-            password="1234",
+            password=f"{hashed_password}",
             email="admin@gmail.com",
             token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwidXNlcklkIjoiNjYyNTBkMjBjOTZlNmUyMDY1NTZhYTU5IiwiaWF0IjoxNzEzNzEzMTc1LCJleHAiOjE3MTM3MTY3NzV9.njd0XGUHyq9QGRtu8WAS2h8PnE4a_a04GGTwNiNojz0",
             tokenExpiresIn=datetime.utcnow() + timedelta(days=0, hours=8)
@@ -94,31 +97,31 @@ def get_productsall(id=None):
           properties:
             id_rice:
               type: string
-              description: The ID of the rice product.
+              description:  หมายเลขรหัสอ้างอิงของแต่ละแถว
             Seed_RepDate:
               type: string
-              description: The representation date of the rice product.
+              description: วันที่รายงานข้อมูลเมล็ดพันธุ์ (ในรูปแบบของปีไทย)
             Seed_Year:
               type: string
-              description: The year of the rice product.
+              description: ปีที่รายงานข้อมูลเมล็ดพันธุ์ (ในรูปแบบของปีไทย)
             Seeds_YearWeek:
               type: string
-              description: The year and week of the rice product.
+              description: สัปดาห์ของปีที่รายงานข้อมูลเมล็ดพันธุ์
             Seed_Variety:
               type: string
-              description: The variety of the rice product.
+              description: สายพันธุ์ของเมล็ดพันธุ์
             Seed_RDCSD:
               type: string
-              description: The RDCSD of the rice product.
+              description: สถานที่เก็บเมล็ดพันธุ์
             Seed_Stock2Sale:
               type: integer
-              description: The stock available for sale of the rice product.
+              description: จำนวนเมล็ดพันธุ์ที่พร้อมขาย
             Seed_Season:
               type: string
-              description: The season of the rice product.
+              description: ฤดูกาลของการเพาะปลูกเมล็ดพันธุ์
             Seed_Crop_Year:
               type: string
-              description: The crop year of the rice product.
+              description: ปีการเพาะปลูกเมล็ดพันธุ์
       404:
         description: Product not found.
     """
@@ -308,42 +311,42 @@ def post_product():
       - name : Seed_RepDate
         in: query
         type: string
-        description: Seed_RepDate of the rice product to Insert
+        description: วันที่รายงานข้อมูลเมล็ดพันธุ์ (ในรูปแบบของปีไทย) 
         required: true
       - name : Seed_Year
         in: query
         type: string
-        description: Seed_Year of the rice product to Insert
+        description: ปีที่รายงานข้อมูลเมล็ดพันธุ์ (ในรูปแบบของปีไทย) 
         required: true
       - name : Seeds_YearWeek
         in: query
         type: string
-        description: Seeds_YearWeek of the rice product to Insert
+        description: สัปดาห์ของปีที่รายงานข้อมูลเมล็ดพันธุ์ 
         required: true
       - name : Seed_Variety
         in: query
         type: string
-        description: Seed_Variety of the rice product to Insert
+        description: สายพันธุ์ของเมล็ดพันธุ์ 
         required: true
       - name : Seed_RDCSD
         in: query
         type: string
-        description: Seed_RDCSD of the rice product to Insert
+        description: สถานที่เก็บเมล็ดพันธุ์ 
         required: true
       - name : Seed_Stock2Sale
         in: query
         type: string
-        description: Seed_Stock2Sale of the rice product to Insert
+        description: จำนวนเมล็ดพันธุ์ที่พร้อมขาย 
         required: true
       - name : Seed_Season
         in: query
         type: string
-        description: Seed_Season of the rice product to Insert
+        description: ฤดูกาลของการเพาะปลูกเมล็ดพันธุ์ 
         required: true
       - name : Seed_Crop_Year
         in: query
         type: string
-        description: Seed_Crop_Year of the rice product to Insert
+        description: ปีการเพาะปลูกเมล็ดพันธุ์ 
         required: true
 
       - name: token
@@ -466,7 +469,7 @@ def delete_product():
       - name: id
         in: query
         type: string
-        description: ID of the rice product to delete
+        description: รหัสอ้างอิงเมล็ดพันธุ์
         required: true
       - name: token
         in: query
@@ -547,47 +550,47 @@ def put_product():
       - name : id
         in: query
         type: string
-        description: ID of the rice product to update
+        description: รหัสอ้างอิงเมล็ดพันธุ์
         required: true
       - name : Seed_RepDate
         in: query
         type: string
-        description: Seed_RepDate of the rice product to update
+        description: วันที่รายงานข้อมูลเมล็ดพันธุ์ (ในรูปแบบของปีไทย)
         required: true
       - name : Seed_Year
         in: query
         type: string
-        description: Seed_Year of the rice product to update
+        description: ปีที่รายงานข้อมูลเมล็ดพันธุ์ (ในรูปแบบของปีไทย)
         required: true
       - name : Seeds_YearWeek
         in: query
         type: string
-        description: Seeds_YearWeek of the rice product to update
+        description: สัปดาห์ของปีที่รายงานข้อมูลเมล็ดพันธุ์
         required: true
       - name : Seed_Variety
         in: query
         type: string
-        description: Seed_Variety of the rice product to update
+        description: สายพันธุ์ของเมล็ดพันธุ์
         required: true
       - name : Seed_RDCSD
         in: query
         type: string
-        description: Seed_RDCSD of the rice product to update
+        description: สถานที่เก็บเมล็ดพันธุ์
         required: true
       - name : Seed_Stock2Sale
         in: query
         type: string
-        description: Seed_Stock2Sale of the rice product to update
+        description: จำนวนเมล็ดพันธุ์ที่พร้อมขาย
         required: true
       - name : Seed_Season
         in: query
         type: string
-        description: Seed_Season of the rice product to update
+        description: ฤดูกาลของการเพาะปลูกเมล็ดพันธุ์
         required: true
       - name : Seed_Crop_Year
         in: query
         type: string
-        description: Seed_Crop_Year of the rice product to update
+        description: ปีการเพาะปลูกเมล็ดพันธุ์
         required: true
       - name: token
         in: query
@@ -696,7 +699,10 @@ def logincheck():
     try:
         username = request.args.get("username")  # Get username from query string
         password = request.args.get("password")  # Get password from query string
-        
+
+        hashed_password = hashlib.sha512(password.encode()).hexdigest()
+
+        password = hashed_password
         print(f"Username : {username} , Password : {password}")
 
         user = User.objects(username=username, password=password).first()
