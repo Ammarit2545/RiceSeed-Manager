@@ -734,7 +734,6 @@ def logincheck():
         print("An error occurred:", e)
         return jsonify({"error": "An error occurred while processing the request"}), 500
 
-
 if __name__ == "__main__":
     csv_file_path = r"C:\Users\armm4\OneDrive\เดสก์ท็อป\rice-api-python\CSV\37176ff3-dd70-4f1f-8e1d-83eda3cf77e4.csv"
     try :
