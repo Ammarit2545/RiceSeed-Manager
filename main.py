@@ -386,14 +386,13 @@ def post_product():
 
         # Check if the rice information already exists in the database
         existing_info = RiceInformation.objects(
-            Seed_RepDate=Seed_RepDate,
-            Seed_Year=Seed_Year,
-            Seeds_YearWeek=Seeds_YearWeek,
-            Seed_Variety=str(Seed_Variety),
-            Seed_RDCSD=str(Seed_RDCSD),
-            Seed_Stock2Sale=int(Seed_Stock2Sale),
-            Seed_Season=str(Seed_Season),
-            Seed_Crop_Year=str(Seed_Crop_Year)
+            Seed_RepDate=int(Seed_RepDate),
+            Seed_Year=int(Seed_Year),
+            Seeds_YearWeek=int(Seeds_YearWeek),
+            Seed_Variety=f"{Seed_Variety}",
+            Seed_RDCSD=f"{Seed_RDCSD}",
+            Seed_Season=f"{Seed_Season}",
+            Seed_Crop_Year=f"{Seed_Crop_Year}"
         ).first()
 
         
@@ -670,7 +669,7 @@ def put_product():
         print("An error occurred:", e)
         return jsonify({"error": "An error occurred while updating product"}), 500
 
-@app.route("/login", methods=["PUT"])
+@app.route("/login", methods=["POST"])
 def logincheck():
     """
     Check user credentials for login.
@@ -705,8 +704,7 @@ def logincheck():
             token = "asdasdasd"
             # Generate JWT token with expiry time
             token_expiry = datetime.utcnow() + timedelta(hours=8)
-            import jwt
-            from datetime import datetime, timedelta
+            
 
             # Secret key for signing the token (replace with your own secure key)
             secret_key = 'Softnix'
@@ -717,7 +715,7 @@ def logincheck():
             token = jwt.encode(payload, secret_key, algorithm='HS256')
 
             userToken = User.objects(username=username).first()
-            #userToken.token = token
+            userToken.token = token
             userToken.tokenExpiresIn = token_expiry
             userToken.save()
             print("token_expiry : ",token_expiry)
