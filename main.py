@@ -3,12 +3,15 @@ import csv
 from flask import Flask, request, jsonify
 from pymongo import MongoClient
 import mongoengine
-from datetime import datetime, timedelta
+from datetime import datetime, timezone ,timedelta
 import json
 from flasgger import Swagger
 import hashlib
 from pytz import timezone
-import jwt
+#import jwt
+from flask import Flask, request, jsonify
+from werkzeug.urls import quote
+import os
 
 #Model
 from models.rice_informations import RiceInformation
@@ -22,7 +25,6 @@ mongoengine.connect("Softnix2024", host="localhost", port=27017)
 
 # กำหนด timezone ของประเทศไทย
 thailand_timezone = timezone('Asia/Bangkok')
-
 # หาเวลาปัจจุบัน (UTC)
 utc_now = datetime.utcnow()
 
@@ -52,6 +54,27 @@ if "Softnix2024" not in MongoClient().list_database_names():
         hashed_password = hashlib.sha512(password.encode()).hexdigest()
 
         print("Hashed Password:", hashed_password)
+       
+        
+        from datetime import datetime, timezone, timedelta
+
+        # หาเวลาปัจจุบัน (UTC)
+        utc_now = datetime.now(timezone.utc)
+        nowtime = datetime.now(timezone.utc) + timedelta(hours=8)
+        # แสดงผลลัพธ์เวลาและวันที่ปัจจุบัน
+        print("User Thailand Now:", nowtime)
+        
+
+        user = User(
+            username="admin",
+            password=f"{hashed_password}",
+            email="admin@gmail.com",
+            token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwidXNlcklkIjoiNjYyNTBkMjBjOTZlNmUyMDY1NTZhYTU5IiwiaWF0IjoxNzEzNzEzMTc1LCJleHAiOjE3MTM3MTY3NzV9.njd0XGUHyq9QGRtu8WAS2h8PnE4a_a04GGTwNiNojz0",
+      
+           
+            tokenExpiresIn=nowtime
+        )
+        user.save()
         for i in range(len(data)):
             try:
                 n = int(data[i][6].replace(',', ''))
@@ -70,14 +93,7 @@ if "Softnix2024" not in MongoClient().list_database_names():
             except Exception as e:
                 print(f"Error occurred in row {i+1}: {e}")
 
-        user = User(
-            username="admin",
-            password=f"{hashed_password}",
-            email="admin@gmail.com",
-            token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwidXNlcklkIjoiNjYyNTBkMjBjOTZlNmUyMDY1NTZhYTU5IiwiaWF0IjoxNzEzNzEzMTc1LCJleHAiOjE3MTM3MTY3NzV9.njd0XGUHyq9QGRtu8WAS2h8PnE4a_a04GGTwNiNojz0",
-            tokenExpiresIn=datetime.utcnow() + timedelta(days=0, hours=8)
-        )
-        user.save()
+        
 
 @app.route("/allproducts", methods=["GET"])
 def get_productsall(id=None):
@@ -705,7 +721,7 @@ def logincheck():
 
         password = hashed_password
         print(f"Username : {username} , Password : {password}")
-
+        
         user = User.objects(username=username, password=password).first()
         if user:
             token = "asdasdasd"
@@ -735,7 +751,23 @@ def logincheck():
         return jsonify({"error": "An error occurred while processing the request"}), 500
 
 if __name__ == "__main__":
-    csv_file_path = r"C:\Users\armm4\OneDrive\เดสก์ท็อป\rice-api-python\CSV\37176ff3-dd70-4f1f-8e1d-83eda3cf77e4.csv"
+
+
+    # ระบุตำแหน่งที่อยู่ปัจจุบันของโปรเจ็ค
+    current_directory = os.getcwd()
+
+    # ระบุเส้นทางไปยังไฟล์ CSV
+    relative_path = os.path.join("CSV", "37176ff3-dd70-4f1f-8e1d-83eda3cf77e4.csv")
+
+    # รับเส้นทางปัจจุบันของโปรเจ็ค
+    current_directory = os.getcwd()
+
+    # รวมเส้นทางไปยังไฟล์ CSV
+    csv_file_path = os.path.join(current_directory, relative_path)
+
+    print("Expected CSV file path:", csv_file_path)
+
+    #csv_file_path = r"F:\RiceSeed-Manager-main\CSV\37176ff3-dd70-4f1f-8e1d-83eda3cf77e4.csv"
     try :
         import_csv_to_mongodb(csv_file_path)
     except:
