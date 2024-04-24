@@ -8,7 +8,7 @@ import json
 from flasgger import Swagger
 import hashlib
 from pytz import timezone
-#import jwt
+import jwt
 from flask import Flask, request, jsonify
 from werkzeug.urls import quote
 import os
